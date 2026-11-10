@@ -1,6 +1,6 @@
 {
   "name": "function-studio-pro",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -23,5 +23,9 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "15.5.28",
     "typescript": "^5.0.0"
+  },
+  "description": "Interactive mathematical graphing workspace",
+  "engines": {
+    "node": ">=20.9.0"
   }
 }

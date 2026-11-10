@@ -1,6 +1,19 @@
-# Function Studio Pro — Function Builder & Intersection Explorer
+# Function Studio — Graphing Workspace
 
-A Next.js 15 / React 19 / TypeScript interactive mathematics playground.
+A Next.js 15 / React 19 / TypeScript mathematical graphing workspace.
+
+## Features
+
+- Multi-expression editor with visibility and color controls
+- Safe recursive-descent expression parser (does not use `eval` or `Function`)
+- Operators: `+ - * / ^`, unary signs, parentheses, implicit multiplication (`2x`, `3(x+1)`)
+- Functions: `sin`, `cos`, `tan`, inverse trig, hyperbolic trig, `sqrt`, `abs`, `ln`, `log`, `log2`, `exp`, `floor`, `ceil`, `round`, `sign`, `min`, `max`, `pow`
+- Constants: `pi`, `e`
+- Automatically generated sliders for free variables such as `a`, `b`, `c`
+- Canvas plotting, adaptive grid spacing, wheel zoom, pointer pan, trace cursor
+- Live expression values, numerical crossing candidates for the selected pair
+- Trace animation, undo/redo, shareable URL state
+- Responsive layout
 
 ## Run locally
 
@@ -11,52 +24,25 @@ npm run dev
 
 Open http://localhost:3000.
 
-## Included function families
-
-- Identity and constant
-- Linear: `ax + b`
-- Quadratic: `ax² + bx + c`
-- Cubic: `ax³ + bx² + cx + d`
-- Quartic: `ax⁴ + bx³ + cx² + dx + e`
-- Sine: `a sin(bx + c) + d`
-- Cosine: `a cos(bx + c) + d`
-- Exponential: `a · bˣ + c`
-- Logarithm: `a · log_b(x) + c`
-- Natural logarithm: `a · ln(x) + c`
-- Absolute value: `a|x − b| + c`
-- Square root: `a√x + c`
-- Reciprocal: `a/x + c`
-- Damped wave: `a e^(−b|x|) sin(cx) + d`
-- Inverted parabola: `−ax² + bx + c`
-
-## Coefficient controls and bounds
-
-Each function exposes only the coefficients that belong to its general form. Numeric inputs are clamped to their displayed minimum and maximum so users cannot enter arbitrarily large coefficients. The graph derives its vertical scale from the current functions and clips invalid/out-of-domain values (for example, logarithms for `x <= 0`).
-
-## Intersections
-
-The app numerically searches the visible x interval `[-12, 12]` for sign-changing roots using bisection and separately brackets stationary points of `f(x)-g(x)` as tangency candidates. It displays all detected intersections (up to 12 rows), plus the minimum and maximum intersection x-values and their y-values. These are numerical estimates, not symbolic proofs; very close or high-multiplicity roots may require higher precision.
-
-The graph uses a symmetric-log vertical display transform to preserve detail near zero and keep large values visible. Live outputs and intersection coordinates remain in original mathematical units.
-
-
-## Intersection engine correction (updated)
-
-- The horizontal inspection interval is now `[-12, 12]`, so the default comparison `x^3` and `2^x` includes both real intersections in the displayed interval (approximately `1.373467` and `9.939535`).
-- Intersection detection scans the full visible interval, brackets sign-changing roots with bisection, and separately searches local minima of `|f(x)-g(x)|` for tangential contacts.
-- Duplicate roots are merged and results are sorted before minimum/maximum intersection values are displayed.
-- The UI labels now describe the actual `[-12, 12]` interval rather than `[-2π, 2π]`.
-
-Numerical caveat: this is a numerical detector, not a symbolic proof. Very closely spaced roots, pathological high-multiplicity contacts, and roots outside the current viewing interval can require a more specialized method. The displayed count refers to the current interval only.
-
-## Mathematical verification and tests
-
-The intersection engine is isolated in `app/lib/intersections.ts` and has an automated regression suite. Run it with:
+## Build
 
 ```bash
-npm test
+npm run typecheck
+npm run build
 ```
 
-The suite tests cubic-vs-exponential (both roots), tangency, multiple sine roots, no-root cases, interval-boundary roots, invalid logarithm domains, and a smoke sweep of all 120 unordered pairs of the 16 function types using representative default parameters.
+## Mathematical and implementation notes
 
-See [`docs/MATHEMATICAL-VERIFICATION.md`](docs/MATHEMATICAL-VERIFICATION.md) for the algorithm, domain notes, regression results, and limitations. Results are numerical estimates over `[-12, 12]`, not formally certified complete root counts for arbitrary coefficient settings.
+This is an original graphing workspace inspired by common graphing-calculator workflows. It does not use Desmos source code, branding, assets, or private APIs.
+
+The expression parser is a deliberately limited arithmetic/function parser. It is not a complete CAS. Current graph rows are explicit `y = expression` functions of `x`; implicit relations, inequalities, polar/parametric plots, tables, symbolic differentiation/integration, and interval-certified root isolation are not implemented in this release.
+
+Intersection readout currently searches sign-changing roots for the first two visible expressions over a finite x-window. It can miss tangencies, roots closer than the sampling resolution, and roots outside the search interval. Treat results as exploratory numerical candidates, not certified mathematics.
+
+Share links serialize the current expression state into the URL. Very large states may exceed practical URL length limits.
+
+## Viewport fitting for steep functions
+
+The graph now keeps independent horizontal and vertical pixel scales. Use the **FIT** control in the graph toolbar to frame the currently visible expressions. This is useful for steep functions such as `y = x^4`, whose values grow much faster than the default viewport can display. The FIT operation changes only the viewport (axis scales and center); it never alters, clamps, or bends the mathematical function. Horizontal and vertical grid intervals are calculated independently and the footer reports both scales. Scroll zoom remains cursor-anchored, and dragging pans in the corresponding axis units.
+
+This is an adaptive Cartesian viewport, not a nonlinear transformation of function values. If a future logarithmic/symlog axis mode is added, it must be explicitly labelled because tangent geometry and distances change under nonlinear coordinate transforms.
